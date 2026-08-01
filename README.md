@@ -1,68 +1,56 @@
 # Breast cancer classification with PyTorch
 
-This is a small, teaching-oriented machine-learning project built around the
-Wisconsin Diagnostic Breast Cancer dataset. It uses numerical measurements of
-cell nuclei to train a neural network that classifies samples as benign or
-malignant.
-
-The notebooks introduce the complete workflow in two stages:
-
-1. `data_exploration.ipynb` explores and prepares the data.
-2. `pytorch_modeling.ipynb` teaches the core PyTorch workflow, with an emphasis
-   on custom `Dataset` classes, `DataLoader`s, neural networks, training loops,
-   evaluation, and saving model parameters.
+This teaching project demonstrates a small end-to-end PyTorch prototype using
+the Wisconsin Diagnostic Breast Cancer dataset. It covers data preparation,
+custom `Dataset` and `DataLoader` classes, model construction, parameter
+initialization, training, evaluation, and saving a model checkpoint.
 
 
-
-## Repository structure
+## Project structure
 
 ```text
 psi_practical_recap/
 ├── data/
-│   ├── raw/
-│   │   └── breast_cancer_data.csv
-│   └── processed/
-│       ├── train.csv
-│       ├── validation.csv
-│       └── test.csv
+│   ├── raw/                  # Original dataset
+│   └── processed/            # Train, validation, and test CSV files
 ├── notebooks/
 │   ├── data_exploration.ipynb
 │   └── pytorch_modeling.ipynb
 ├── src/
 │   ├── dataset.py            # Dataset and DataLoader definitions
 │   ├── engine.py             # Training and evaluation loops
-│   ├── model.py              # Network and parameter initialization
-│   ├── prepare_data.py       # Rebuilds the raw and processed CSV files
-│   └── train.py              # Runs the complete training workflow
-├── outputs/                  # Generated model files and predictions
+│   ├── model.py              # Network and Xavier initialization
+│   ├── prepare_data.py       # Data preparation entry point
+│   └── train.py              # Training entry point
+├── outputs/                  # Generated model checkpoints
 ├── environment.yml
 └── README.md
 ```
 
 ## Prerequisites
 
-Install the following before starting:
+Install [Git](https://git-scm.com/) and
+[Miniconda](https://docs.conda.io/projects/miniconda/en/latest/) (or another
+Conda-compatible distribution). A GPU is not required.
 
-- [Git](https://git-scm.com/)
-- [Miniconda](https://docs.conda.io/projects/miniconda/en/latest/) or another
-  Conda-compatible distribution
+## 1. Copy the repository
 
-The supplied environment uses Python 3.11 and installs CPU PyTorch, pandas,
-NumPy, scikit-learn, Matplotlib, JupyterLab, and ipykernel. A GPU is not required.
-
-## 1. Clone the repository
+Clone the repository and enter its directory:
 
 ```bash
 git clone https://github.com/olimpijada72/psi_practical_recap.git
 cd psi_practical_recap
 ```
 
-## 2. Create the Conda environment
+Alternatively, download the repository as a ZIP file from GitHub, extract it,
+and open a terminal in the extracted `psi_practical_recap` directory.
 
-Create the environment from the checked-in specification:
+## 2. Set up the environment
+
+Create the `psi_recap` environment from `environment.yml`:
 
 ```bash
-conda env create -f environment.yml
+conda env create --file environment.yml
 ```
 
 Activate it:
@@ -71,20 +59,79 @@ Activate it:
 conda activate psi_recap
 ```
 
+You only need to create the environment once. Activate it again whenever you
+open a new terminal and want to work on the project.
 
-## 3. Register the Jupyter kernel
+Verify that Python and PyTorch are available:
 
-With `psi_recap` activated, register it as a notebook kernel:
+```bash
+python --version
+python -c "import torch; print(torch.__version__)"
+```
+
+If the environment already exists and `environment.yml` changes, update it with:
+
+```bash
+conda env update --name psi_recap --file environment.yml --prune
+```
+
+## 3. Prepare the data
+
+The preparation script loads the dataset, creates stratified train, validation,
+and test splits, fits a `RobustScaler` on the training split, and saves both the
+raw and processed CSV files:
+
+```bash
+python src/prepare_data.py
+```
+
+The generated files are written to `data/raw/` and `data/processed/`.
+
+## 4. Train and evaluate the model
+
+Run the complete training workflow:
+
+```bash
+python src/train.py
+```
+
+The script loads the processed CSV files, trains the network, retains the epoch
+with the best validation F1, evaluates that model on the test split, and writes
+the checkpoint to `outputs/pytorch_classifier.pth`.
+
+You can override common training settings:
+
+```bash
+python src/train.py --epochs 50 --batch-size 64 --learning-rate 0.0005
+```
+
+List every command-line option:
+
+```bash
+python src/train.py --help
+```
+
+## Complete command-line workflow
+
+After cloning the repository, the complete workflow is:
+
+```bash
+conda env create --file environment.yml
+conda activate psi_recap
+python src/prepare_data.py
+python src/train.py
+```
+
+Skip the first command if the environment has already been created.
+
+## Run the notebooks
+
+The notebooks explain the same workflow interactively. First register the Conda
+environment as a Jupyter kernel:
 
 ```bash
 python -m ipykernel install --user --name psi_recap --display-name "Python (psi_recap)"
 ```
-
-This command normally needs to be run only once. In JupyterLab or VS Code,
-select **Python (psi_recap)** as the kernel for each notebook.
-
-
-## 4. Run the notebooks interactively
 
 Start JupyterLab from the repository root:
 
@@ -92,53 +139,11 @@ Start JupyterLab from the repository root:
 jupyter lab
 ```
 
-Open and run the notebooks in this order:
+Select **Python (psi_recap)** as the kernel and run the notebooks in order:
 
 1. `notebooks/data_exploration.ipynb`
 2. `notebooks/pytorch_modeling.ipynb`
 
-In each notebook, confirm that **Python (psi_recap)** is selected, then use
-**Run > Run All Cells**. The processed CSV files are already included, so the
-modeling notebook can also be run by itself.
-
-The modeling notebook writes generated artifacts to `outputs/`, including the
-trained model parameters. Generated output files are ignored by Git.
-
-## Prepare the data without Jupyter
-
-The essential preparation workflow is also available as a standalone script.
-It loads the scikit-learn dataset, creates stratified 60/20/20 splits, fits a
-`RobustScaler` only on the training data, and saves both the raw and processed
-CSV files:
-
-```bash
-python src/prepare_data.py
-```
-
-Run this command with `psi_recap` activated. The script resolves paths from its
-own location, so it can be invoked from any working directory.
-
-## Train without Jupyter
-
-The notebook prototype is divided into small modules under `src/`. Run the
-complete training and evaluation workflow from the repository root with:
-
-```bash
-python src/train.py
-```
-
-The script trains for 30 epochs by default, retains the epoch with the highest
-validation F1, evaluates it on the test split, and saves the checkpoint to
-`outputs/pytorch_classifier.pth`.
-
-Common settings can be changed from the command line:
-
-```bash
-python src/train.py --epochs 50 --batch-size 64 --learning-rate 0.0005
-```
-
-Display every available option with:
-
-```bash
-python src/train.py --help
-```
+The first notebook explores and prepares the data. The second walks through the
+PyTorch prototype. Because the processed CSV files are included, the modeling
+notebook can also be run independently.
