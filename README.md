@@ -59,21 +59,6 @@ Activate it:
 conda activate psi_recap
 ```
 
-You only need to create the environment once. Activate it again whenever you
-open a new terminal and want to work on the project.
-
-Verify that Python and PyTorch are available:
-
-```bash
-python --version
-python -c "import torch; print(torch.__version__)"
-```
-
-If the environment already exists and `environment.yml` changes, update it with:
-
-```bash
-conda env update --name psi_recap --file environment.yml --prune
-```
 
 ## 3. Prepare the data
 
