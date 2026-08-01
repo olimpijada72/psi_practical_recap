@@ -12,10 +12,7 @@ The notebooks introduce the complete workflow in two stages:
    on custom `Dataset` classes, `DataLoader`s, neural networks, training loops,
    evaluation, and saving model parameters.
 
-The model is selected using validation F1. The modeling notebook also contains
-an exercise that changes the selection objective to validation accuracy.
 
-> This repository is an educational example, not a clinical diagnostic system.
 
 ## Repository structure
 
@@ -31,6 +28,12 @@ psi_practical_recap/
 ├── notebooks/
 │   ├── data_exploration.ipynb
 │   └── pytorch_modeling.ipynb
+├── src/
+│   ├── dataset.py            # Dataset and DataLoader definitions
+│   ├── engine.py             # Training and evaluation loops
+│   ├── model.py              # Network and parameter initialization
+│   ├── prepare_data.py       # Rebuilds the raw and processed CSV files
+│   └── train.py              # Runs the complete training workflow
 ├── outputs/                  # Generated model files and predictions
 ├── environment.yml
 └── README.md
@@ -68,12 +71,6 @@ Activate it:
 conda activate psi_recap
 ```
 
-If the environment already exists and `environment.yml` has changed, update it
-instead:
-
-```bash
-conda env update --name psi_recap --file environment.yml --prune
-```
 
 ## 3. Register the Jupyter kernel
 
@@ -86,11 +83,6 @@ python -m ipykernel install --user --name psi_recap --display-name "Python (psi_
 This command normally needs to be run only once. In JupyterLab or VS Code,
 select **Python (psi_recap)** as the kernel for each notebook.
 
-To verify that the environment is active and PyTorch is available:
-
-```bash
-python -c "import torch; print(torch.__version__)"
-```
 
 ## 4. Run the notebooks interactively
 
@@ -112,29 +104,41 @@ modeling notebook can also be run by itself.
 The modeling notebook writes generated artifacts to `outputs/`, including the
 trained model parameters. Generated output files are ignored by Git.
 
-## Run everything from the command line
+## Prepare the data without Jupyter
 
-With the environment activated and from the repository root, execute both
-notebooks in place:
-
-```bash
-jupyter nbconvert --to notebook --execute --inplace notebooks/data_exploration.ipynb
-jupyter nbconvert --to notebook --execute --inplace notebooks/pytorch_modeling.ipynb
-```
-
-The second command should be run only after the first has completed. Executing
-with `--inplace` saves cell outputs back into each notebook.
-
-## Start again with a clean environment
-
-If the environment becomes inconsistent, remove and recreate it:
+The essential preparation workflow is also available as a standalone script.
+It loads the scikit-learn dataset, creates stratified 60/20/20 splits, fits a
+`RobustScaler` only on the training data, and saves both the raw and processed
+CSV files:
 
 ```bash
-conda deactivate
-conda env remove --name psi_recap
-conda env create -f environment.yml
-conda activate psi_recap
+python src/prepare_data.py
 ```
 
-The Jupyter kernel registration can remain in place because it points to the
-environment name. If needed, register it again using the command in step 3.
+Run this command with `psi_recap` activated. The script resolves paths from its
+own location, so it can be invoked from any working directory.
+
+## Train without Jupyter
+
+The notebook prototype is divided into small modules under `src/`. Run the
+complete training and evaluation workflow from the repository root with:
+
+```bash
+python src/train.py
+```
+
+The script trains for 30 epochs by default, retains the epoch with the highest
+validation F1, evaluates it on the test split, and saves the checkpoint to
+`outputs/pytorch_classifier.pth`.
+
+Common settings can be changed from the command line:
+
+```bash
+python src/train.py --epochs 50 --batch-size 64 --learning-rate 0.0005
+```
+
+Display every available option with:
+
+```bash
+python src/train.py --help
+```
