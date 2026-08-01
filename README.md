@@ -59,8 +59,33 @@ Activate it:
 conda activate psi_recap
 ```
 
+## 3. Run the notebooks
 
-## 3. Prepare the data
+The notebooks explain the same workflow interactively. First register the Conda
+environment as a Jupyter kernel:
+
+```bash
+python -m ipykernel install --user --name psi_recap --display-name "Python (psi_recap)"
+```
+
+Start JupyterLab from the repository root:
+
+```bash
+jupyter lab
+```
+
+Select **Python (psi_recap)** as the kernel and run the notebooks in order:
+
+1. `notebooks/data_exploration.ipynb`
+2. `notebooks/pytorch_modeling.ipynb`
+
+The first notebook explores and prepares the data. The second walks through the
+PyTorch prototype. Because the processed CSV files are included, the modeling
+notebook can also be run independently.
+
+
+## 4. Optionally, you can run the code through scripts
+### 4.1. Prepare the data
 
 The preparation script loads the dataset, creates stratified train, validation,
 and test splits, fits a `RobustScaler` on the training split, and saves both the
@@ -72,7 +97,7 @@ python src/prepare_data.py
 
 The generated files are written to `data/raw/` and `data/processed/`.
 
-## 4. Train and evaluate the model
+### 4.2. Train and evaluate the model
 
 Run the complete training workflow:
 
@@ -96,7 +121,7 @@ List every command-line option:
 python src/train.py --help
 ```
 
-## Complete command-line workflow
+### 4.3. Complete command-line workflow
 
 After cloning the repository, the complete workflow is:
 
@@ -109,26 +134,3 @@ python src/train.py
 
 Skip the first command if the environment has already been created.
 
-## Run the notebooks
-
-The notebooks explain the same workflow interactively. First register the Conda
-environment as a Jupyter kernel:
-
-```bash
-python -m ipykernel install --user --name psi_recap --display-name "Python (psi_recap)"
-```
-
-Start JupyterLab from the repository root:
-
-```bash
-jupyter lab
-```
-
-Select **Python (psi_recap)** as the kernel and run the notebooks in order:
-
-1. `notebooks/data_exploration.ipynb`
-2. `notebooks/pytorch_modeling.ipynb`
-
-The first notebook explores and prepares the data. The second walks through the
-PyTorch prototype. Because the processed CSV files are included, the modeling
-notebook can also be run independently.
